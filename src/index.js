@@ -5,6 +5,7 @@ import ReactDOM from "react-dom";
 import { Provider } from "unstated";
 import DevTools from "./dev-tools";
 import EditorStateContainer from "./state/editor";
+import EditorViewStream from "./utils/streams/editorViewStream";
 
 const DEVTOOLS_CLASS_NAME = "__prosemirror-dev-tools__";
 
@@ -27,7 +28,10 @@ function createPlace() {
 
 function applyDevTools(editorView, props) {
   const place = createPlace();
-  const editorState = new EditorStateContainer(editorView, props);
+  const editorState = new EditorStateContainer(
+    new EditorViewStream(editorView),
+    props
+  );
 
   ReactDOM.render(
     <Provider inject={[editorState]}>

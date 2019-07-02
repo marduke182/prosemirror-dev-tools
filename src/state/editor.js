@@ -146,6 +146,9 @@ export function updateEditorHistory(
   tr,
   newState
 ) {
+  if (history.length === 0) {
+    return [{ state: newState, timestamp: Date.now() }];
+  }
   const skipHistory = tr.getMeta("_skip-dev-tools-history_");
 
   if (skipHistory) return;
@@ -159,7 +162,7 @@ export default class EditorStateContainer extends Container {
   state = {
     EditorState: function() {},
     view: null,
-    state: {},
+    state: null,
     schema: {},
     nodeColors: {},
     activeMarks: [],
@@ -171,18 +174,10 @@ export default class EditorStateContainer extends Container {
     nodePicker: NODE_PICKER_DEFAULT
   };
 
-  constructor(editorView, props) {
+  constructor(stream, props) {
     super();
 
-    this.state = Object.assign({}, this.state, {
-      EditorState: getEditorStateClass(props),
-      view: editorView,
-      state: editorView.state,
-      nodeColors: buildColors(editorView.state.schema),
-      history: [{ state: editorView.state, timestamp: Date.now() }]
-    });
-
-    subscribeOnUpdates(editorView, (tr, oldState, newState) => {
+    stream.subscribe((tr, oldState, newState) => {
       const updatedHistory = updateEditorHistory(
         this.state.history,
         this.state.historyRolledBackTo,
